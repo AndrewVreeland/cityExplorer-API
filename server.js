@@ -8,7 +8,6 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 
-//! data = require('./data/data.json');
 let data = require('./data/weather.json');
 // *** ONCE WE BRING IN EXPRESS WE CALL IT TO CREATE THE SERVER ***
 // ** app === server
@@ -37,13 +36,13 @@ app.get('/weather', (request, response, next) => {
   try {
     let queriedData = request.query.city_name;
     let dataToGroom = data.find(city => city.city_name === queriedData);
+    console.log(dataToGroom);
     let dataToSend = new Forecast(dataToGroom);
+    console.log(dataToSend);
     response.status(200).send(dataToSend);
   } catch (error) {
     next(error);
   }
-
-
 });
 
 app.get('/hello', (request, response) => {
@@ -77,14 +76,14 @@ class Forecast {
 }
 
 
+// *** ERROR HANDLING - PLUG AND PLAY CODE FROM EXPRESS DOCS ****
+app.use((error, request, response, next) => {
+  response.status(500);
+});
+
 // *** CATCH ALL - BE AT THE BOTTOM AND SERVE AS A 404 ERROR MESSAGE
 app.get('*', (request, response) => {
   response.status(404).send('This route does not exist');
 });
 
-
-// *** ERROR HANDLING - PLUG AND PLAY CODE FROM EXPRESS DOCS ****
-app.use((error, request, response, next) => {
-  response.status(500);
-});
 
