@@ -7,8 +7,9 @@ console.log('yay our first server!');
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
+const axios = require('axios');
 
-let data = require('./data/weather.json');
+let weather = require('./data/weather.json');
 // *** ONCE WE BRING IN EXPRESS WE CALL IT TO CREATE THE SERVER ***
 // ** app === server
 const app = express();
@@ -16,7 +17,7 @@ const app = express();
 // *** MIDDLEWARE - CORS ****
 app.use(cors());
 
-// *** PORT THAT MY SERVER WILL RUN ON ***
+// *** PORT THAT MY SERVER WILL RUN ON - will fall back of 3002***
 const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => console.log(`we are running on port ${PORT}!`));
@@ -32,48 +33,73 @@ app.get('/', (request, response) => {
   response.status(200).send('welcome to my server');
 });
 
-app.get('/weather', (request, response, next) => {
+app.get('/movie', async (request, response, next) => {
   try {
-    let queriedData = request.query.city_name;
-    let dataToGroom = data.find(city => city.city_name === queriedData);
-    console.log(dataToGroom);
-    let dataToSend = new Forecast(dataToGroom);
-    console.log(dataToSend);
-    response.status(200).send(dataToSend);
+    //TODO: accept my queries -> /movie?
+    let city = request.query.searchQuery;
+    let movieResults = await axios.get(movieUrl);
+    //TODO: build my url for axios
+    let movieUrl = `https://api.themoviedb.org/3/search/movie?query=${city}&api_key=${process.env.REACT_APP_REACT_APP_weatherBit_API_KEY}&language=en-US&page=1&include_adult=false`
+    response.status(200).send();
+
+    // TODO: groom that data and send it to the frontend
+    let moviesToSend = movieResults.results.data.map(film => new Movie(film));
+
+
+
+    response.status(200).send(moviesToSend);
+  }
+  catch (error) {
+    next(error);
+  }
+});
+
+class Movie {
+  constructor(movieObj) {
+    this.title = movieObj.title;
+    this.description = movieObj.overview;
+  }
+}
+
+
+app.get('/weather', async (request, response, next) => {
+  try {
+
+
+    //TODO: accept quries - lat. lon, searchQuery
+    let lat = request.query.lat;
+    let lon = request.query.lon;
+    let city = request.query.searchQuery;
+
+    console.log(request.query);
+
+    //TODO: find that city based on CITYNAME - json
+    // https://api.weatherbit.io/v2.0/forecast/daily/?key=8e5566baca0d4701850857ca9f194d31&lat=47.6062&lon=-122.3321&untis=I&days=5
+    let url = `http://api.weatherbit.io/v2.0/forecast/daily/?key=${process.env.REACT_APP_weatherBit_API_KEY}&lat=${lat}&lon=${lon}&untis=I&days=5`;
+    console.log(url);
+
+    let weatherResults = await axios.get(url);
+    console.log(weatherResults.data.data); 
+    // TODO: senc city into this class to be groomed
+
+    
+    let weatherToSend = weatherResults.data.data.map(day => new Forecast(day));
+
+    response.status(200).send(weatherToSend);
   } catch (error) {
     next(error);
   }
 });
 
-app.get('/hello', (request, response) => {
-
-  let userFirstName = request.query.firstName;
-  let userLastName = request.query.lastName;
-
-  response.status(200).send(`Hello ${userFirstName} ${userLastName}! Welcome to my server!`);
-});
-
+// TODO: Update class with weather API info
 // *** CLASS TO GROOM BULKY DATA ***
-
 class Forecast {
-  constructor(cityObj) {
-
-    {
-      this.city_name = cityObj.city_name;
-      this.date = cityObj.valid_date;
-      this.description = cityObj.weather.description;
-      // this.lon = cityObj.lon;
-      // this.lat = cityObj.lat;
-    }
-
-
-    // this.weather = cityObj.weather.description;
-
-    // let queriedLocation = request.query.data.city_name
-    // let queriedDate = request.query.valid_date
-    // let queriedWeather = request.query.weather.description
+  constructor(dayObj) {
+    this.date = dayObj.valid_date;
+    this.description = dayObj.weather.description;
   }
 }
+
 
 
 // *** ERROR HANDLING - PLUG AND PLAY CODE FROM EXPRESS DOCS ****
