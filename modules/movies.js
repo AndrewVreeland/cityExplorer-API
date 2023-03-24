@@ -13,7 +13,7 @@ async function getMovies(request, response, next) {
     let city = request.query.searchQuery;
     let movieKey = `Movie ${city}-cityName`;
 
-    if (cache[movieKey] && (Date.now() - cache[movieKey].timestamp) < 10000) {
+    if (cache[movieKey] && (Date.now() - cache[movieKey].timestamp) < 2.628e+9) {
       console.log(' Movie cache was hit!');
 
       response.status(200).send(cache[movieKey].data);

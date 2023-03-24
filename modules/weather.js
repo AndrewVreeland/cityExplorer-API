@@ -14,7 +14,7 @@ async function getWeather(request, response, next) {
 
 
 
-    if (cache[key] && (Date.now() - cache[key].timestamp) < 10000) {
+    if (cache[key] && (Date.now() - cache[key].timestamp) < 8.64e+7) {
       console.log('cache was hit!');
 
       response.status(200).send(cache[key].data);
