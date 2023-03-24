@@ -6,16 +6,13 @@ const cors = require('cors');
 const getMovies = require('./modules/movies.js');
 const getWeather = require('./modules/weather');
 const welcome = require('./modules/welcome');
-
-
-
-
 const app = express();
-
-app.use(cors());
-
 const PORT = process.env.PORT || 3002;
 
+
+
+
+app.use(cors());
 app.listen(PORT, () => console.log(`we are running on port ${PORT}!`));
 
 // *** ENDPOINTS ****
